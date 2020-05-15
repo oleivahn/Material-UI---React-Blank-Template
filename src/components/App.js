@@ -13,18 +13,18 @@ function App() {
         <Header />
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route exact path="/services" component={() => <div>services</div>} />
+          <Route exact path="/services" component={() => <div>Services</div>} />
           <Route
             exact
-            path="/customsoftware"
+            path="/custom"
             component={() => <div>Custom Software</div>}
           />
           <Route
             exact
-            path="/mobileapps"
+            path="/mobile"
             component={() => <div>Mobile Apps</div>}
           />
-          <Route exact path="/websites" component={() => <div>websites</div>} />
+          <Route exact path="/websites" component={() => <div>Websites</div>} />
           <Route
             exact
             path="/revolution"

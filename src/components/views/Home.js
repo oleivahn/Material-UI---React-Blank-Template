@@ -6,6 +6,7 @@ import Typography from "@material-ui/core/Typography";
 const useStyles = makeStyles({});
 
 const Home = () => {
+  // eslint-disable-next-line no-unused-vars
   const classes = useStyles();
 
   return (
