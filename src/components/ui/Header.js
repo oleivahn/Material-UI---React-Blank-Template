@@ -120,7 +120,12 @@ const useStyles = makeStyles((theme) => ({
     // },
   },
   drawerItemSelected: {
-    opacity: 1,
+    "& .MuiListItemText-root": {
+      opacity: 1,
+    },
+  },
+  appBar: {
+    zIndex: theme.zIndex.modal + 1,
   },
 }));
 
@@ -160,68 +165,63 @@ const Header = (props) => {
   };
 
   const menuOptions = [
-    { name: "Services", link: "/services" },
-    { name: "Custom Software Development", link: "/custom" },
-    { name: "Mobile App Development", link: "/mobile" },
-    { name: "Websites Development", link: "/websites" },
+    { name: "Services", link: "/services", activeIndex: 1, selectedIndex: 0 },
+    {
+      name: "Custom Software Development",
+      link: "/custom",
+      activeIndex: 1,
+      selectedIndex: 1,
+    },
+    {
+      name: "Mobile App Development",
+      link: "/mobile",
+      activeIndex: 1,
+      selectedIndex: 2,
+    },
+    {
+      name: "Websites Development",
+      link: "/websites",
+      activeIndex: 1,
+      selectedIndex: 3,
+    },
   ];
+
+  const routes = [
+    { name: "Home", link: "/", activeIndex: 0 },
+    {
+      name: "Services",
+      link: "/services",
+      activeIndex: 1,
+      ariaOwns: anchorEl ? "simple-menu" : undefined,
+      ariaPopup: anchorEl ? "true" : undefined,
+      mouseOver: (e) => handleClick(e),
+    },
+    { name: "The Revolution", link: "/revolution", activeIndex: 2 },
+    { name: "About Us", link: "/about", activeIndex: 3 },
+    { name: "Contact Us", link: "/contact", activeIndex: 4 },
+    // { name: "Test Us", link: "/test", activeIndex: 6 },
+  ];
+
+  // const bigArray = [...menuOptions, ...routes];
+  // console.log(bigArray);
 
   // Maintains the routes on url bar in case of a window refresh. Reloads on old url, not directly to /home
   useEffect(() => {
-    switch (window.location.pathname) {
-      case "/":
-        if (value !== 0) {
-          setValue(0);
-        }
-        break;
-      case "/services":
-        if (value !== 1) {
-          setValue(1);
-          setSelectedIndex(0);
-        }
-        break;
-      case "/custom":
-        if (value !== 1) {
-          setValue(1);
-          setSelectedIndex(1);
-        }
-        break;
-      case "/mobile":
-        if (value !== 1) {
-          setValue(1);
-          setSelectedIndex(2);
-        }
-        break;
-      case "/websites":
-        if (value !== 1) {
-          setValue(1);
-          setSelectedIndex(3);
-        }
-        break;
-      case "/revolution":
-        if (value !== 2) {
-          setValue(2);
-        }
-        break;
-      case "/about":
-        if (value !== 3) {
-          setValue(3);
-        }
-        break;
-      case "/contact":
-        if (value !== 4) {
-          setValue(4);
-        }
-        break;
-      case "/estimate":
-        if (value !== 5) {
-          setValue(5);
-        }
-        break;
-      default:
-        break;
-    }
-  }, [value]);
+    [...menuOptions, ...routes].forEach((route) => {
+      switch (window.location.pathname) {
+        case `${route.link}`:
+          if (value !== route.activeIndex) {
+            setValue(route.activeIndex);
+            if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
+              setSelectedIndex(route.selectedIndex);
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    });
+  }, [value, menuOptions, selectedIndex, routes]);
 
   // Tabs are created separately to allow responsiveness. (If true = display || don't)
   const tabs = (
@@ -232,44 +232,19 @@ const Header = (props) => {
         className={classes.tabContainer}
         indicatorColor="primary" // Removes the bottom indicator on the tabs. Default color is secondary
       >
-        <Tab
-          className={classes.tab}
-          label="Home"
-          component={NavLink} // turns this Tab component into a NavLink comp
-          to="/" // since this is a NavLink now, you can use NavLink's normal props
-          disableRipple
-        />
-        <Tab
-          className={classes.tab}
-          label="Services"
-          component={NavLink}
-          to="/services"
-          onMouseOver={(e) => handleClick(e)} // Menu is created at the bottom
-          disableRipple
-          aria-owns={anchorEl ? "simple-menu" : undefined} // Matches id on the Menu component
-          aria-haspopup={anchorEl ? "true" : undefined} // Mainly for ally purposes
-        />
-        <Tab
-          className={classes.tab}
-          label="The Revolution"
-          component={NavLink}
-          to="/revolution"
-          disableRipple
-        />
-        <Tab
-          className={classes.tab}
-          label="About Us"
-          component={NavLink}
-          to="/about"
-          disableRipple
-        />
-        <Tab
-          className={classes.tab}
-          label="Contact Us"
-          component={NavLink}
-          to="/contact"
-          disableRipple
-        />
+        {routes.map((route, index) => (
+          <Tab
+            key={`${route}${index}`}
+            className={classes.tab}
+            label={route.name}
+            component={NavLink}
+            to={route.link}
+            onMouseOver={route.mouseOver} // Menu is created at the bottom
+            disableRipple
+            aria-owns={route.ariaOwns} // Matches id on the Menu component
+            aria-haspopup={route.ariaPopup} // Mainly for ally purposes
+          />
+        ))}
       </Tabs>
       <Button variant="contained" color="secondary" className={classes.button}>
         Free Estimate
@@ -284,10 +259,12 @@ const Header = (props) => {
         MenuListProps={{ onMouseLeave: handleClose }} // handle close menu when mouse leaves. Passing props down to the <MenuList> that lies under our component. (Component composition)
         classes={{ paper: classes.menu, root: classes.MenuItem }}
         elevation={0}
+        style={{ zIndex: 1302 }}
+        keepMounted
       >
         {menuOptions.map((option, i) => (
           <MenuItem
-            key={option}
+            key={`${option}${i}`}
             onClick={(e) => {
               handleMenuItemClick(e, i); // Add the selected index
               setValue(1); // route /services no matter what
@@ -315,124 +292,29 @@ const Header = (props) => {
         onOpen={() => setOpenDrawer(true)}
         classes={{ paper: classes.drawer }} // to overwrite the base MUI component styles
       >
+        <div className={classes.toolbarMargin} />
         {/* disablePadding: to remove that top padding added by MUI */}
         <List disablePadding>
-          {/* <ListItem divider>
-            <ListItemText className={classes.drawerItem} disableTypography>
-              Header Option
-            </ListItemText>
-          </ListItem> */}
-          <ListItem
-            divider
-            button
-            component={NavLink}
-            to="/"
-            onClick={() => {
-              setOpenDrawer(false);
-              setValue(0);
-            }}
-            selected={value === 0}
-          >
-            <ListItemText
-              className={
-                // Add multiple classes if route matches to keep opacity correct
-                value === 0
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
+          {routes.map((route) => (
+            <ListItem
+              key={`${route}${route.activeIndex}`}
+              divider
+              button
+              component={NavLink}
+              to={route.link}
+              onClick={() => {
+                setOpenDrawer(false);
+                setValue(route.activeIndex);
+              }}
+              selected={value === route.activeIndex}
+              classes={{ selected: classes.drawerItemSelected }}
             >
-              Home
-            </ListItemText>
-          </ListItem>
-          <ListItem
-            divider // Add the little divider at the bottom
-            button // turn it into a button with button stylings too
-            component={NavLink}
-            to="/services"
-            onClick={() => {
-              setOpenDrawer(false);
-              setValue(1);
-            }}
-            selected={value === 1}
-          >
-            <ListItemText
-              className={
-                value === 1
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
-            >
-              Services
-            </ListItemText>
-          </ListItem>
-          <ListItem
-            divider
-            button
-            component={NavLink}
-            to="/revolution"
-            onClick={() => {
-              setOpenDrawer(false);
-              setValue(2);
-            }}
-            selected={value === 2}
-          >
-            <ListItemText
-              className={
-                value === 2
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
-            >
-              The Revolution
-            </ListItemText>
-          </ListItem>
-          <ListItem
-            divider
-            button
-            component={NavLink}
-            to="/about"
-            onClick={() => {
-              setOpenDrawer(false);
-              setValue(3);
-            }}
-            selected={value === 3}
-          >
-            <ListItemText
-              className={
-                value === 3
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
-            >
-              About Us
-            </ListItemText>
-          </ListItem>
-          <ListItem
-            divider
-            button
-            component={NavLink}
-            to="/contact"
-            onClick={() => {
-              setOpenDrawer(false);
-              setValue(4);
-            }}
-            selected={value === 4}
-          >
-            <ListItemText
-              className={
-                value === 4
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
-            >
-              Contact Us
-            </ListItemText>
-          </ListItem>
+              <ListItemText className={classes.drawerItem} disableTypography>
+                {route.name}
+              </ListItemText>
+            </ListItem>
+          ))}
+
           <ListItem
             divider
             button
@@ -443,16 +325,12 @@ const Header = (props) => {
               setValue(5);
             }}
             selected={value === 5}
-            className={classes.drawerItemEstimate}
+            classes={{
+              root: classes.drawerItemEstimate,
+              selected: classes.drawerItemSelected,
+            }}
           >
-            <ListItemText
-              className={
-                value === 5
-                  ? [classes.drawerItem, classes.drawerItemSelected]
-                  : classes.drawerItem
-              }
-              disableTypography
-            >
+            <ListItemText className={classes.drawerItem} disableTypography>
               Free Estimate
             </ListItemText>
           </ListItem>
@@ -476,7 +354,7 @@ const Header = (props) => {
   return (
     <React.Fragment>
       <ElevationScroll>
-        <AppBar position="fixed" color="primary">
+        <AppBar position="fixed" color="primary" className={classes.appBar}>
           <Toolbar disableGutters={true}>
             <Button
               component={NavLink}
