@@ -257,7 +257,7 @@ const Header = (props) => {
         open={openMenu} // true or false
         onClose={handleClose}
         MenuListProps={{ onMouseLeave: handleClose }} // handle close menu when mouse leaves. Passing props down to the <MenuList> that lies under our component. (Component composition)
-        classes={{ paper: classes.menu, root: classes.MenuItem }}
+        classes={{ paper: classes.menu }}
         elevation={0}
         style={{ zIndex: 1302 }}
         keepMounted
